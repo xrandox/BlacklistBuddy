@@ -283,7 +283,7 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
         /// <param name="checkForUpdates">If true, will query the remote list to check for updates there. If false, just checks the local lists</param>
         private async Task CheckForBlacklistUpdate(bool showPopup, bool checkForUpdates)
         {
-            if (checkForUpdates) { await _blacklists.HasUpdate(); Logger.Debug("Checking remote list"); }
+            if (checkForUpdates) { await _blacklists.HasUpdate(); }
             else _blacklists.LoadMissingList();
 
 

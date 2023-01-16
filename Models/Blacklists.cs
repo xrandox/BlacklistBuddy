@@ -82,7 +82,6 @@ namespace Teh.BHUD.Blacklist_Buddy_Module.Models
                 externalBlacklist = newUserList.ToList();
             }
 
-            Logger.Debug("Success in loading external list");
         }
 
         public void LoadMissingList() 
