@@ -7,3 +7,15 @@ Features:
 * Optional popup for when there are new names
 * Toggles for different categories of blacklist reasons (Scammers, RMTers, GW2Exchange Blacklist, Other, Unknown)
 * Ability to skip updates, reset the internal blacklist, and force check for new updates
+
+
+
+
+
+
+
+
+
+# Credits
+null/xrandox/xTeh - vast majority of the spaghetti code
+Freesnöw/dlamkins - refactoring said spaghetti code into something usable 
