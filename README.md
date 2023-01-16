@@ -17,5 +17,5 @@ Features:
 
 
 # Credits
-null/xrandox/xTeh - vast majority of the spaghetti code
-Freesnöw/dlamkins - refactoring said spaghetti code into something usable 
+* null/xrandox/xTeh - vast majority of the spaghetti code
+* Freesnöw/dlamkins - refactoring said spaghetti code into something usable 
