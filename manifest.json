@@ -1,6 +1,6 @@
 {
   "name": "Blacklist Buddy",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "namespace": "Teh.BHUD.Blacklist_Buddy_Module",
   "package": "Teh.BHUD.Blacklist_Buddy_Module.dll",
   "manifest_version": 1,
@@ -9,7 +9,7 @@
   "dependencies": {
     "bh.blishhud": ">=1.0.0"
   },
-  "url": "https://github.com/ryans/BlacklistBuddyModule",
+  "url": "https://github.com/xrandox/BlacklistBuddy",
   "contributors": [
     {
       "name": "null",
