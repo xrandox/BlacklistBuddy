@@ -32,9 +32,9 @@ namespace Teh.BHUD.Blacklist_Buddy_Module.Controls
 
         static PopupWindow()
         {
-            windowTexture = BlacklistBuddyModule.ModuleInstance.ContentsManager.GetTexture("155960.png");
-            windowEmblemTexture = BlacklistBuddyModule.ModuleInstance.ContentsManager.GetTexture("1654245.png");
-            backgroundImageTexture = BlacklistBuddyModule.ModuleInstance.ContentsManager.GetTexture("156771.png");
+            windowTexture = AsyncTexture2D.FromAssetId(155960);
+            windowEmblemTexture = AsyncTexture2D.FromAssetId(1654245);
+            backgroundImageTexture = AsyncTexture2D.FromAssetId(156771);
         }
 
         #endregion
