@@ -14,6 +14,10 @@ namespace Teh.BHUD.Blacklist_Buddy_Module.Controls
 {
     public class PopupWindow : StandardWindow
     {
+        //private const int WINDOW_WIDTH = 488;
+        //private const int WINDOW_HEIGHT = 250;
+        //private const int CONTENT_HEIGHT = 260;
+
         private Label upperLabel;
         private Label lowerLabel;
         private Label nameLabel;
@@ -32,20 +36,20 @@ namespace Teh.BHUD.Blacklist_Buddy_Module.Controls
 
         static PopupWindow()
         {
-            windowTexture = AsyncTexture2D.FromAssetId(155960);
-            windowEmblemTexture = AsyncTexture2D.FromAssetId(1654245);
-            backgroundImageTexture = AsyncTexture2D.FromAssetId(156771);
+            windowTexture = BlacklistBuddyModule.ModuleInstance.ContentsManager.GetTexture("155960resize.png");
+            windowEmblemTexture = BlacklistBuddyModule.ModuleInstance.ContentsManager.GetTexture("1654245.png");
+            backgroundImageTexture = BlacklistBuddyModule.ModuleInstance.ContentsManager.GetTexture("156771.png");
         }
 
         #endregion
 
-        public PopupWindow(string subtitle) : base(windowTexture, new Rectangle(5, 50, 488, 232), new Rectangle(0, 0, 488, 232))
+        public PopupWindow(string subtitle) : base(windowTexture, new Rectangle(4, 50, 488, 236), new Rectangle(0, 0, 488, 260))
         {
             this.Title = "Blacklist Buddy";
             this.Subtitle = subtitle;
             this.Emblem = windowEmblemTexture;
             this.Location = new Point(125,125);
-            this.HeightSizingMode = SizingMode.AutoSize;
+            this.SavesPosition = true;
             this.Parent = GameService.Graphics.SpriteScreen;
             BuildContents();
             this.Show();
