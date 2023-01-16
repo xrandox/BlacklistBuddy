@@ -1,0 +1,21 @@
+{
+  "name": "Blacklist Buddy",
+  "version": "0.0.1",
+  "namespace": "Teh.BHUD.Blacklist_Buddy_Module",
+  "package": "Teh.BHUD.Blacklist_Buddy_Module.dll",
+  "manifest_version": 1,
+
+  "description": "Assists traders in managing their block list using the Overflow Trading Company's blacklist to avoid trading with scammers or other potentially dangerous individuals.",
+  "dependencies": {
+    "bh.blishhud": ">=1.0.0"
+  },
+  "url": "https://github.com/ryans/BlacklistBuddyModule",
+  "contributors": [
+    {
+      "name": "null",
+      "username": "xTeh.7146"
+    }
+  ],
+  "directories": [ "blacklistbuddy" ],
+  "enabled_without_gw2": false
+}
