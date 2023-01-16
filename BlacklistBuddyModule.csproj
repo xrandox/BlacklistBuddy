@@ -242,6 +242,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="ref\155960.png" />
+    <Content Include="ref\155960resize.png" />
     <Content Include="ref\156771.png" />
     <Content Include="ref\1654245.png" />
     <Content Include="ref\BlacklistAlert.png" />

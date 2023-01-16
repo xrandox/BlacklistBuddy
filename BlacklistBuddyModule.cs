@@ -64,11 +64,11 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
             _settingIncludeUnknown     = settings.DefineSetting("IncludeUnknown", true, ()=>"Include individuals blacklist for unknown reasons", ()=>"The reason behind why these names are blacklisted have been lost with time. Still not recommended to trade with them.");
 
             //check every time settings changed
-            _settingIncludeScam.SettingChanged    += async (s, e) => { await CheckForBlacklistUpdate(false); };
-            _settingIncludeRMT.SettingChanged     += async (s, e) => { await CheckForBlacklistUpdate(false); };
-            _settingIncludeGW2E.SettingChanged    += async (s, e) => { await CheckForBlacklistUpdate(false); };
-            _settingIncludeOther.SettingChanged   += async (s, e) => { await CheckForBlacklistUpdate(false); };
-            _settingIncludeUnknown.SettingChanged += async (s, e) => { await CheckForBlacklistUpdate(false); };
+            _settingIncludeScam.SettingChanged    += async (s, e) => { await CheckForBlacklistUpdate(false, false); };
+            _settingIncludeRMT.SettingChanged     += async (s, e) => { await CheckForBlacklistUpdate(false, false); };
+            _settingIncludeGW2E.SettingChanged    += async (s, e) => { await CheckForBlacklistUpdate(false, false); };
+            _settingIncludeOther.SettingChanged   += async (s, e) => { await CheckForBlacklistUpdate(false, false); };
+            _settingIncludeUnknown.SettingChanged += async (s, e) => { await CheckForBlacklistUpdate(false, false); };
         }
 
         protected override void Initialize() { }
@@ -86,7 +86,9 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
             _blacklistCornerIcon._resetMenuItem.Click += delegate { InitiateReset(); };
             _blacklistCornerIcon._skipUpdateMenuItem.Click += async (s, args) => { await SkipUpdate(); };
 
-            CheckForBlacklistUpdate(true);
+            _blacklistCornerIcon.Click += delegate { };
+
+            CheckForBlacklistUpdate(true, true);
 
             base.OnModuleLoaded(e);
         }
@@ -98,7 +100,7 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
             if (_runningTime > 1800000) //check every 30 min
             {
                 _runningTime = 0;
-                CheckForBlacklistUpdate(true);
+                CheckForBlacklistUpdate(true, true);
             }
         }
 
@@ -113,9 +115,9 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
         /// </summary>
         private async Task ForceUpdateCheck()
         {
-            await CheckForBlacklistUpdate(false);
+            await CheckForBlacklistUpdate(false, true);
 
-            if (await _blacklists.HasUpdate())
+            if (_blacklists.HasMissingNames())
             {
                 _popupWindow = new PopupWindow("Update Available!");
                 _popupWindow.ShowUpperLabel("New names found! To start sync process, click the button\n\n" + _blacklists.NewNamesLabel());
@@ -151,7 +153,7 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
         {
             await _blacklists.ResetBlacklists();
 
-            await CheckForBlacklistUpdate(false);
+            await CheckForBlacklistUpdate(false, false);
 
             _popupWindow = new PopupWindow("Blacklist Reset");
             _popupWindow.ShowLowerLabel("Your internal blocklist has been reset successfully.");
@@ -249,7 +251,7 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
             _popupWindow.ShowMiddleButton("Close");
             _popupWindow.middleButton.Click += delegate { _popupWindow.Dispose(); };
 
-            await CheckForBlacklistUpdate(false);
+            await CheckForBlacklistUpdate(false, false);
         }
 
         /// <summary>
@@ -271,16 +273,21 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
         private async Task SkipUpdate()
         {
             await _blacklists.SyncLists();
-            await CheckForBlacklistUpdate(false);
+            await CheckForBlacklistUpdate(false, false);
         }
 
         /// <summary>
         /// Performs check for any updates, changes corner icon and creates popup if enabled in user settings
         /// </summary>
         /// <param name="showPopup">If true, will show a popup if there is an update available. If false, skips showing an update</param>
-        private async Task CheckForBlacklistUpdate(bool showPopup)
+        /// <param name="checkForUpdates">If true, will query the remote list to check for updates there. If false, just checks the local lists</param>
+        private async Task CheckForBlacklistUpdate(bool showPopup, bool checkForUpdates)
         {
-            if (await _blacklists.HasUpdate())
+            if (checkForUpdates) { await _blacklists.HasUpdate(); Logger.Debug("Checking remote list"); }
+            else _blacklists.LoadMissingList();
+
+
+            if (_blacklists.HasMissingNames())
             {
                 if (showPopup && _settingShowAlertPopup.Value)
                 {
@@ -297,5 +304,6 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
                 _blacklistCornerIcon.ShowNormal();
             }
         }
+
     }
 }

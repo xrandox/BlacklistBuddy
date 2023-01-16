@@ -81,9 +81,11 @@ namespace Teh.BHUD.Blacklist_Buddy_Module.Models
             if (newUserList.Length > externalBlacklist.Count) {
                 externalBlacklist = newUserList.ToList();
             }
+
+            Logger.Debug("Success in loading external list");
         }
 
-        private void LoadMissingList() 
+        public void LoadMissingList() 
         {
             bool includeScam = BlacklistBuddyModule._settingIncludeScam.Value;
             bool includeRMT = BlacklistBuddyModule._settingIncludeRMT.Value;
@@ -178,7 +180,8 @@ namespace Teh.BHUD.Blacklist_Buddy_Module.Models
         {
             internalBlacklist.AddRange(missingBlacklistedPlayers);
             SaveInternalList();
-            await LoadAll();
+            LoadMissingList();
+            //await LoadAll(); ========================================================================================================================================================================
         }
 
         /// <summary>
@@ -187,10 +190,10 @@ namespace Teh.BHUD.Blacklist_Buddy_Module.Models
         public async Task ResetBlacklists()
         {
             internalBlacklist.Clear();
-            externalBlacklist.Clear();
             missingBlacklistedPlayers.Clear();
             SaveInternalList();
-            await LoadAll();
+            LoadMissingList();
+            //await LoadAll(); ========================================================================================================================================================================
         }
 
         /// <summary>
@@ -202,7 +205,8 @@ namespace Teh.BHUD.Blacklist_Buddy_Module.Models
             int index = missingBlacklistedPlayers.IndexOf(blacklistedPlayer);
             internalBlacklist.AddRange(missingBlacklistedPlayers.GetRange(0, index + 1));
             SaveInternalList();
-            await LoadAll();
+            LoadMissingList();
+            //await LoadAll(); ========================================================================================================================================================================
         }
 
         /// <summary>
@@ -218,5 +222,8 @@ namespace Teh.BHUD.Blacklist_Buddy_Module.Models
             if (missingUnknown != 0) text += "\nNew Unknown IGNs: " + missingUnknown;
             return text;
         }
+
+
+        public bool HasMissingNames() { return missingBlacklistedPlayers.Count > 0; }
     }
 }
