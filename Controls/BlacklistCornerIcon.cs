@@ -1,6 +1,8 @@
 ﻿using Blish_HUD;
 using Blish_HUD.Controls;
+using Blish_HUD.Input;
 using Blish_HUD.Modules.Managers;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -51,9 +53,15 @@ namespace Teh.BHUD.Blacklist_Buddy_Module.Controls
             _iconMenu.AddMenuItem(_skipUpdateMenuItem);
 
             Icon = _blacklistIconTexture;
-            BasicTooltipText = "Blacklist Buddy";
+            BasicTooltipText = "Blacklist Buddy - Click to open menu";
             Parent = GameService.Graphics.SpriteScreen;
             Menu = _iconMenu;
+            
+            Click += delegate { 
+                Point location = GameService.Input.Mouse.Position; 
+                _iconMenu.Location = location;
+                _iconMenu.Show();
+            };
         }
 
         /// <summary>
@@ -63,7 +71,7 @@ namespace Teh.BHUD.Blacklist_Buddy_Module.Controls
         public void ShowAlert(int numNewNames)
         {
             this.Icon = _blacklistIconAlertTexture;
-            this.BasicTooltipText = "Update Available - " + numNewNames + " names to add - Right-click to open menu";
+            this.BasicTooltipText = "Update Available - " + numNewNames + " names to add - Click to open menu";
         }
 
         /// <summary>
