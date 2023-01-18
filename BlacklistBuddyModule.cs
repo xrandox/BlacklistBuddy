@@ -38,6 +38,7 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
         public static SettingEntry<bool> _settingIncludeGW2E;
         public static SettingEntry<bool> _settingIncludeOther;
         public static SettingEntry<bool> _settingIncludeUnknown;
+        public static SettingEntry<int> _settingInputBuffer;
         private PopupWindow _popupWindow;
         private BlacklistCornerIcon _blacklistCornerIcon;
         internal Blacklists _blacklists;
@@ -62,6 +63,10 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
             _settingIncludeGW2E        = settings.DefineSetting("IncludeGW2E", true, ()=>"Include r/GW2Exchange blacklist", ()=>"GW2Exchange does not list specific reasoning, but they are listed for either breaking ToS, subreddit rules or scamming");
             _settingIncludeOther       = settings.DefineSetting("IncludeOther", true, ()=>"Include individuals blacklisted for other reasons", ()=>"Such as: Gross Misconduct, Horrible Trade Etiquette, other ToS Violations, etc");
             _settingIncludeUnknown     = settings.DefineSetting("IncludeUnknown", true, ()=>"Include individuals blacklist for unknown reasons", ()=>"The reason behind why these names are blacklisted have been lost with time. Still not recommended to trade with them.");
+
+            _settingInputBuffer = settings.DefineSetting("InputBuffer", 350, () => "Input Buffer (Low - High)", () => "Increases the time between adding names. Default: Low. \nWARNING: Raising this slider too high will result in very long sync durations.");
+            _settingInputBuffer.SetRange(350, 2000);
+            _settingInputBuffer.SettingChanged += delegate { _blacklists.EstimateTime(); };
 
             //check every time settings changed
             _settingIncludeScam.SettingChanged    += async (s, e) => { await CheckForBlacklistUpdate(false, false); };
@@ -218,14 +223,14 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
                     if (copyToClipboard)
                     {
                         Blish_HUD.Controls.Intern.Keyboard.Stroke(VirtualKeyShort.RETURN, true); //throw an extra return in case there's an error box we need to clear -- doesn't affect the block list any
-                        await Task.Delay(25);
+                        await Task.Delay(50);
                         Blish_HUD.Controls.Intern.Keyboard.Press(VirtualKeyShort.CONTROL, true);
                         Blish_HUD.Controls.Intern.Keyboard.Stroke(VirtualKeyShort.KEY_V, true);
                         await Task.Delay(25);
                         Blish_HUD.Controls.Intern.Keyboard.Release(VirtualKeyShort.CONTROL, true);
                         await Task.Delay(25);
                         Blish_HUD.Controls.Intern.Keyboard.Stroke(VirtualKeyShort.RETURN, true);
-                        await Task.Delay(350);
+                        await Task.Delay(_settingInputBuffer.Value);
                         count--;
                     }
                 }

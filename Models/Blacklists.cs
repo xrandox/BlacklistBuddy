@@ -14,7 +14,7 @@ namespace Teh.BHUD.Blacklist_Buddy_Module.Models
 
     public class Blacklists
     {
-
+        
         private static readonly Logger Logger = Logger.GetLogger<BlacklistBuddyModule>();
 
         private List<BlacklistedPlayer> internalBlacklist = new List<BlacklistedPlayer>();
@@ -146,7 +146,12 @@ namespace Teh.BHUD.Blacklist_Buddy_Module.Models
                 totalAll++;
             }
 
-            estimatedTime = Math.Round((double)(missingAll * 425) / 1000);
+            EstimateTime();
+        }
+
+        public void EstimateTime()
+        {
+            estimatedTime = Math.Round((double)(missingAll * (BlacklistBuddyModule._settingInputBuffer.Value + 100)) / 1000);
         }
 
         private void SaveInternalList()
