@@ -95,6 +95,15 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
 
             CheckForBlacklistUpdate(true, true);
 
+            GameService.GameIntegration.Gw2Instance.Gw2LostFocus += delegate { 
+                if (_doSync)
+                {
+                    _doSync = false;
+                    _popupWindow.Dispose();
+                    MakePauseWindow(1);
+                }
+            };
+
             base.OnModuleLoaded(e);
         }
 
@@ -201,10 +210,10 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
             _popupWindow = new PopupWindow("Syncing");
             _popupWindow.ShowBackgroundImage();
             _popupWindow.ShowLeftButton("Pause");
-            _popupWindow.leftButton.Click += delegate { _doSync = false; _popupWindow.Dispose(); MakePauseWindow(); };
+            _popupWindow.leftButton.Click += delegate { _doSync = false; _popupWindow.Dispose(); MakePauseWindow(0); };
             _popupWindow.ShowRightButton("Cancel");
             _popupWindow.rightButton.Click += delegate { _doSync = false; _popupWindow.Dispose(); };
-            _popupWindow.ShowUpperLabel("If names start stacking up in the text box,\npause and manually enter them before resuming");
+            _popupWindow.ShowUpperLabel("Please do not alt-tab\nIf names start stacking up in the text box,\npause and manually enter them before resuming");
 
             int count = _blacklists.missingAll;
 
@@ -262,10 +271,23 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
         /// <summary>
         /// Creates a pause window for if the user pause in the middle of syncing
         /// </summary>
-        private void MakePauseWindow()
+        private void MakePauseWindow(int reason)
         {
             _popupWindow = new PopupWindow("Syncing Paused");
-            _popupWindow.ShowUpperLabel("Syncing Paused\n\n\nMake sure to the text box is clear before resuming.");
+
+            string reasonStr = "";
+
+            switch (reason)
+            {
+                case 0: reasonStr = "Syncing Paused\n\n\nMake sure to the text box is clear before resuming.";
+                    break;
+                case 1: reasonStr = "Syncing Paused\n\n\nPlease do not alt-tab while syncing is in progress";
+                    break;
+                default: reasonStr = "Syncing Paused";
+                    break;
+            }    
+
+            _popupWindow.ShowUpperLabel(reasonStr);
             _popupWindow.ShowLeftButton("Resume");
             _popupWindow.leftButton.Click += async delegate { _popupWindow.Dispose(); await SyncNames(); };
             _popupWindow.ShowRightButton("Cancel");
