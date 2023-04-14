@@ -30,9 +30,7 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
         internal Gw2ApiManager Gw2ApiManager => this.ModuleParameters.Gw2ApiManager;
         #endregion
 
-        public static SettingEntry<KeyBinding> _settingContactsKeyBinding;
         public static SettingEntry<bool> _settingShowAlertPopup;
-        public static SettingEntry<bool> _settingOpenContacts;
         public static SettingEntry<bool> _settingIncludeScam;
         public static SettingEntry<bool> _settingIncludeRMT;
         public static SettingEntry<bool> _settingIncludeGW2E;
@@ -53,9 +51,6 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
 
         protected override void DefineSettings(SettingCollection settings)
         {
-            _settingContactsKeyBinding = settings.DefineSetting("ContactsKey", new KeyBinding(Keys.Y), ()=>"Contacts Keybind", ()=>"Must match the Contacts Dialog keybind in your settings. Cannot have modifier keys");
-            _settingOpenContacts = settings.DefineSetting("OpenContacts", true, ()=>"Open/close contact panel automatically", ()=>"Automatically opens the contact panel with the assigned contacts keybind during the sync process so you don't have to");
-            
             _settingShowAlertPopup = settings.DefineSetting("ShowAlertPopup", false, ()=>"Show alert popup", ()=>"Shows an alert popup when the module detects an update to the list, in addition to the alert on the icon");
 
             _settingIncludeScam        = settings.DefineSetting("IncludeScam", true, ()=>"Include scammers", ()=>"We recommend always blocking these individuals to protect yourself");
@@ -176,14 +171,12 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
         }
 
         /// <summary>
-        /// First window to start the sync process, also opens the users contact panel if set to
+        /// First window to start the sync process
         /// </summary>
         private void InitiateSync()
         {
-            if (_settingOpenContacts.Value) { Blish_HUD.Controls.Intern.Keyboard.Stroke((VirtualKeyShort)(_settingContactsKeyBinding.Value.PrimaryKey)); }
-
             _popupWindow = new PopupWindow("Update Blocklist");
-            _popupWindow.ShowUpperLabel("Select your block page, click the text box, then click next\n\n" + _blacklists.NewNamesLabel());
+            _popupWindow.ShowUpperLabel("Get to a safe spot and close all other windows, then press next\n\n" + _blacklists.NewNamesLabel());
             _popupWindow.ShowMiddleButton("Next");
             _popupWindow.middleButton.Click += delegate { _popupWindow.Dispose(); ConfirmSync(); };
         }
@@ -195,7 +188,7 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
         {
             _popupWindow = new PopupWindow("Update Blocklist");
             if (_blacklists.missingAll > 30) { _popupWindow.ShowUpperLabel("You are about to sync a lot of names, this will take\nabout " + _blacklists.estimatedTime + " seconds.\n\n"); }
-            _popupWindow.ShowLowerLabel("Please double check that you have the 'Blocked' tab selected\nand the cursor is blinking in the text box");
+            _popupWindow.ShowLowerLabel("Please remain still and do not alt-tab during the sync process.");
             _popupWindow.ShowLeftButton("Start Sync");
             _popupWindow.leftButton.Click += async delegate { _popupWindow.Dispose(); await SyncNames(); };
             _popupWindow.ShowRightButton("Cancel");
@@ -213,7 +206,7 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
             _popupWindow.leftButton.Click += delegate { _doSync = false; _popupWindow.Dispose(); MakePauseWindow(0); };
             _popupWindow.ShowRightButton("Cancel");
             _popupWindow.rightButton.Click += delegate { _doSync = false; _popupWindow.Dispose(); };
-            _popupWindow.ShowUpperLabel("Please do not alt-tab\nIf names start stacking up in the text box,\npause and manually enter them before resuming");
+            _popupWindow.ShowUpperLabel("Please do not alt-tab\n");
 
             int count = _blacklists.missingAll;
 
@@ -228,18 +221,36 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
                 //copy the name to clipboard, then paste into the text box and press enter
                 try
                 {
-                    bool copyToClipboard = await ClipboardUtil.WindowsClipboardService.SetTextAsync(ign);
+                    bool copyToClipboard = await ClipboardUtil.WindowsClipboardService.SetTextAsync("/block " + ign);
                     if (copyToClipboard)
                     {
-                        Blish_HUD.Controls.Intern.Keyboard.Stroke(VirtualKeyShort.RETURN, true); //throw an extra return in case there's an error box we need to clear -- doesn't affect the block list any
+                        Blish_HUD.Controls.Intern.Keyboard.Stroke(VirtualKeyShort.RETURN);
                         await Task.Delay(50);
+
+                        if (!Gw2MumbleService.Gw2Mumble.UI.IsTextInputFocused)
+                        {
+                            Blish_HUD.Controls.Intern.Keyboard.Stroke(VirtualKeyShort.RETURN);
+                            await Task.Delay(50);
+                        }
+                        
+                        Blish_HUD.Controls.Intern.Keyboard.Press(VirtualKeyShort.CONTROL, true);
+                        Blish_HUD.Controls.Intern.Keyboard.Stroke(VirtualKeyShort.KEY_A, true);
+                        await Task.Delay(25);
+                        Blish_HUD.Controls.Intern.Keyboard.Release(VirtualKeyShort.CONTROL, true);
+                        await Task.Delay(25);
+                        Blish_HUD.Controls.Intern.Keyboard.Stroke(VirtualKeyShort.BACK, true);
+                        await Task.Delay(25);
+
+                        //paste block command
                         Blish_HUD.Controls.Intern.Keyboard.Press(VirtualKeyShort.CONTROL, true);
                         Blish_HUD.Controls.Intern.Keyboard.Stroke(VirtualKeyShort.KEY_V, true);
                         await Task.Delay(25);
                         Blish_HUD.Controls.Intern.Keyboard.Release(VirtualKeyShort.CONTROL, true);
                         await Task.Delay(25);
                         Blish_HUD.Controls.Intern.Keyboard.Stroke(VirtualKeyShort.RETURN, true);
-                        await Task.Delay(_settingInputBuffer.Value);
+
+                        //delay for input buffer
+                        await Task.Delay(100);
                         count--;
                     }
                 }
