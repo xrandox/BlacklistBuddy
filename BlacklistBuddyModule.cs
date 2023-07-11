@@ -59,8 +59,8 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
             _settingIncludeOther       = settings.DefineSetting("IncludeOther", true, ()=>"Include individuals blacklisted for other reasons", ()=>"Such as: Gross Misconduct, Horrible Trade Etiquette, other ToS Violations, etc");
             _settingIncludeUnknown     = settings.DefineSetting("IncludeUnknown", true, ()=>"Include individuals blacklist for unknown reasons", ()=>"The reason behind why these names are blacklisted have been lost with time. Still not recommended to trade with them.");
 
-            _settingInputBuffer = settings.DefineSetting("InputBuffer", 350, () => "Input Buffer (Low - High)", () => "Increases the time between adding names. Default: Low. \nWARNING: Raising this slider too high will result in very long sync durations.");
-            _settingInputBuffer.SetRange(350, 2000);
+            _settingInputBuffer = settings.DefineSetting("InputBuffer", 100, () => "Input Buffer (Low - High)", () => "Increases the time between adding names. Default: Low. \nWARNING: Raising this slider too high will result in very long sync durations.");
+            _settingInputBuffer.SetRange(100, 500);
             _settingInputBuffer.SettingChanged += delegate { _blacklists.EstimateTime(); };
 
             //check every time settings changed
