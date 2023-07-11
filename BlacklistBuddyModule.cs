@@ -218,7 +218,7 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
                 _popupWindow.ShowName(ign);
                 _popupWindow.Subtitle = count + " remaining";
 
-                //copy the name to clipboard, then paste into the text box and press enter
+                // Copy the name to clipboard, then paste into the text box and press enter
                 try
                 {
                     bool copyToClipboard = await ClipboardUtil.WindowsClipboardService.SetTextAsync("/block " + ign);
@@ -227,12 +227,20 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
                         Blish_HUD.Controls.Intern.Keyboard.Stroke(VirtualKeyShort.RETURN);
                         await Task.Delay(50);
 
+                        // If the text input isnt focused, try to clear any popup boxes with enter
                         if (!Gw2MumbleService.Gw2Mumble.UI.IsTextInputFocused)
                         {
                             Blish_HUD.Controls.Intern.Keyboard.Stroke(VirtualKeyShort.RETURN);
                             await Task.Delay(50);
                         }
-                        
+
+                        // If still not focused, give it just a tiny bit longer of a delay
+                        if (!Gw2MumbleService.Gw2Mumble.UI.IsTextInputFocused)
+                        {
+                            await Task.Delay(_settingInputBuffer.Value);
+                        }
+
+                        // Clear the chat if there is any
                         Blish_HUD.Controls.Intern.Keyboard.Press(VirtualKeyShort.CONTROL, true);
                         Blish_HUD.Controls.Intern.Keyboard.Stroke(VirtualKeyShort.KEY_A, true);
                         await Task.Delay(25);
@@ -241,7 +249,7 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
                         Blish_HUD.Controls.Intern.Keyboard.Stroke(VirtualKeyShort.BACK, true);
                         await Task.Delay(25);
 
-                        //paste block command
+                        // Paste the block command and name in
                         Blish_HUD.Controls.Intern.Keyboard.Press(VirtualKeyShort.CONTROL, true);
                         Blish_HUD.Controls.Intern.Keyboard.Stroke(VirtualKeyShort.KEY_V, true);
                         await Task.Delay(25);
@@ -249,8 +257,8 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
                         await Task.Delay(25);
                         Blish_HUD.Controls.Intern.Keyboard.Stroke(VirtualKeyShort.RETURN, true);
 
-                        //delay for input buffer
-                        await Task.Delay(100);
+                        // Input buffer delay
+                        await Task.Delay(_settingInputBuffer.Value);
                         count--;
                     }
                 }
