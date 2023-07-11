@@ -188,7 +188,7 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
         {
             _popupWindow = new PopupWindow("Update Blocklist");
             if (_blacklists.missingAll > 30) { _popupWindow.ShowUpperLabel("You are about to sync a lot of names, this will take\nabout " + _blacklists.estimatedTime + " seconds.\n\n"); }
-            _popupWindow.ShowLowerLabel("Please remain still and do not alt-tab during the sync process.");
+            _popupWindow.ShowLowerLabel("Please remain still and do not alt-tab\nor try to do anything else during the sync process.");
             _popupWindow.ShowLeftButton("Start Sync");
             _popupWindow.leftButton.Click += async delegate { _popupWindow.Dispose(); await SyncNames(); };
             _popupWindow.ShowRightButton("Cancel");
