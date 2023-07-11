@@ -1,6 +1,6 @@
 {
   "name": "Blacklist Buddy",
-  "version": "0.0.4",
+  "version": "0.1.0",
   "namespace": "Teh.BHUD.Blacklist_Buddy_Module",
   "package": "Teh.BHUD.Blacklist_Buddy_Module.dll",
   "manifest_version": 1,
