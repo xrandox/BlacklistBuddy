@@ -280,6 +280,7 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
             _popupWindow.Dispose();
 
             _popupWindow = new PopupWindow("Sync Complete");
+            _doSync = false;
             _popupWindow.ShowLowerLabel("Finished syncing your block list successfully");
             _popupWindow.ShowMiddleButton("Close");
             _popupWindow.middleButton.Click += delegate { _popupWindow.Dispose(); };
