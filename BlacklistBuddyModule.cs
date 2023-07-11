@@ -61,6 +61,7 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
 
             _settingInputBuffer = settings.DefineSetting("InputBuffer", 100, () => "Input Buffer (Low - High)", () => "Increases the time between adding names. Default: Low. \nWARNING: Raising this slider too high will result in very long sync durations.");
             _settingInputBuffer.SetRange(100, 500);
+            if (_settingInputBuffer.Value > 500 || _settingInputBuffer.Value < 100) _settingInputBuffer.Value = 100; // In case people have values set from the old version that are outside of the new range
             _settingInputBuffer.SettingChanged += delegate { _blacklists.EstimateTime(); };
 
             //check every time settings changed
