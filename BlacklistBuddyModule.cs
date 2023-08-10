@@ -41,7 +41,7 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
         public static SettingEntry<int> _settingInputBuffer;
         private PopupWindow _popupWindow;
         private BlacklistCornerIcon _blacklistCornerIcon;
-        internal Blacklists _blacklists;
+        internal BlacklistService BlacklistService;
         internal AccountUtil AccountUtil;
 
         private volatile bool _doSync = false;
@@ -61,12 +61,12 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
             _settingIncludeGW2E        = settings.DefineSetting("IncludeGW2E", true, ()=>"Include r/GW2Exchange blacklist", ()=>"GW2Exchange does not list specific reasoning, but they are listed for either breaking ToS, subreddit rules or scamming");
             _settingIncludeOther       = settings.DefineSetting("IncludeOther", true, ()=>"Include individuals blacklisted for other reasons", ()=>"Such as: Gross Misconduct, Horrible Trade Etiquette, other ToS Violations, etc");
             _settingIncludeUnknown     = settings.DefineSetting("IncludeUnknown", true, ()=>"Include individuals blacklist for unknown reasons", ()=>"The reason behind why these names are blacklisted have been lost with time. Still not recommended to trade with them.");
-            _settingSeparateAccounts   = settings.DefineSetting("SeparateAccounts", false, () => "Account-Specific Blacklists (requires API Key with Account priviledge)", () => "Allows you to keep track of synced names separately for different accounts. Requires the an API Key to acquire your account name.");
+            _settingSeparateAccounts   = settings.DefineSetting("SeparateAccounts", false, () => "Enable Account-Specific Blacklists (requires API Key with Account priviledge)", () => "Allows you to keep track of synced names separately for different accounts. Requires the an API Key to acquire your account name.");
 
             _settingInputBuffer = settings.DefineSetting("InputBuffer", 100, () => "Input Buffer (Low - High)", () => "Increases the time between adding names. Default: Low. \nWARNING: Raising this slider too high will result in very long sync durations.");
             _settingInputBuffer.SetRange(100, 500);
             if (_settingInputBuffer.Value > 500 || _settingInputBuffer.Value < 100) _settingInputBuffer.Value = 100; // In case people have values set from the old version that are outside of the new range
-            _settingInputBuffer.SettingChanged += delegate { _blacklists.EstimateTime(); };
+            _settingInputBuffer.SettingChanged += delegate { BlacklistService.EstimateTime(); };
 
             //check every time settings changed
             _settingIncludeScam.SettingChanged    += async (s, e) => { await CheckForBlacklistUpdate(false, false); };
@@ -74,7 +74,7 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
             _settingIncludeGW2E.SettingChanged    += async (s, e) => { await CheckForBlacklistUpdate(false, false); };
             _settingIncludeOther.SettingChanged   += async (s, e) => { await CheckForBlacklistUpdate(false, false); };
             _settingIncludeUnknown.SettingChanged += async (s, e) => { await CheckForBlacklistUpdate(false, false); };
-            _settingSeparateAccounts.SettingChanged += async (s, e) => { await AccountUtil.AccountSettingChanged(e.NewValue); };
+            _settingSeparateAccounts.SettingChanged += async (s, e) => { await AccountUtil.AccountSettingChanged(e.NewValue); await CheckForBlacklistUpdate(false, false); };
         }
 
         protected override void Initialize() 
@@ -83,9 +83,10 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
             _settingSeparateAccounts.SetValidation(AccountUtil.ValidateSetting);
         }
 
-        protected override async Task LoadAsync() {
-            _blacklists = new Blacklists();
-            AccountUtil.AccountSettingChanged(_settingSeparateAccounts.Value).Wait();
+        protected override async Task LoadAsync() 
+        {
+            BlacklistService = new BlacklistService();
+            Gw2ApiManager.SubtokenUpdated += async (s, e) => { await AccountUtil.AccountSettingChanged(_settingSeparateAccounts.Value); await CheckForBlacklistUpdate(false, false); };
         }
 
         protected override void OnModuleLoaded(EventArgs e)
@@ -98,7 +99,7 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
 
             _blacklistCornerIcon.Click += delegate { };
 
-            CheckForBlacklistUpdate(true, true);
+            Task.Run(async () => { await CheckForBlacklistUpdate(true, true); });
             
             GameService.GameIntegration.Gw2Instance.Gw2LostFocus += delegate { 
                 if (_doSync)
@@ -119,7 +120,7 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
             if (_runningTime > 1800000) //check every 30 min
             {
                 _runningTime = 0;
-                CheckForBlacklistUpdate(true, true);
+                Task.Run(async () => { await CheckForBlacklistUpdate(true, true); });
             }
         }
 
@@ -136,10 +137,10 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
         {
             await CheckForBlacklistUpdate(false, true);
 
-            if (_blacklists.HasMissingNames())
+            if (BlacklistService.HasMissingNames())
             {
                 _popupWindow = new PopupWindow("Update Available!");
-                _popupWindow.ShowUpperLabel("New names found! To start sync process, click the button\n\n" + _blacklists.NewNamesLabel());
+                _popupWindow.ShowUpperLabel("New names found! To start sync process, click the button\n\n" + BlacklistService.NewNamesLabel());
                 _popupWindow.ShowMiddleButton("Begin Sync");
                 _popupWindow.middleButton.Click += delegate { _popupWindow.Dispose(); InitiateSync(); };
             }
@@ -170,7 +171,7 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
         /// </summary>
         private async Task ResetBlocklist()
         {
-            await _blacklists.ResetBlacklists();
+            await BlacklistService.UpdateBlacklists(BlacklistService.UpdateType.Reset);
 
             await CheckForBlacklistUpdate(false, false);
 
@@ -186,7 +187,7 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
         private void InitiateSync()
         {
             _popupWindow = new PopupWindow("Update Blocklist");
-            _popupWindow.ShowUpperLabel("Get to a safe spot and close all other windows, then press next\n\n" + _blacklists.NewNamesLabel());
+            _popupWindow.ShowUpperLabel("Get to a safe spot and close all other windows, then press next\n\n" + BlacklistService.NewNamesLabel());
             _popupWindow.ShowMiddleButton("Next");
             _popupWindow.middleButton.Click += delegate { _popupWindow.Dispose(); ConfirmSync(); };
         }
@@ -197,7 +198,7 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
         private void ConfirmSync()
         {
             _popupWindow = new PopupWindow("Update Blocklist");
-            if (_blacklists.missingAll > 30) { _popupWindow.ShowUpperLabel("You are about to sync a lot of names, this will take\nabout " + _blacklists.estimatedTime + " seconds.\n\n"); }
+            if (BlacklistService.TotalMissing() > 30) { _popupWindow.ShowUpperLabel("You are about to sync a lot of names, this will take\nabout " + BlacklistService.EstimatedTime + " seconds.\n\n"); }
             _popupWindow.ShowLowerLabel("Please remain still and do not alt-tab\nor try to do anything else during the sync process.");
             _popupWindow.ShowLeftButton("Start Sync");
             _popupWindow.leftButton.Click += async delegate { _popupWindow.Dispose(); await SyncNames(); };
@@ -218,11 +219,11 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
             _popupWindow.rightButton.Click += delegate { _doSync = false; _popupWindow.Dispose(); };
             _popupWindow.ShowUpperLabel("Please do not alt-tab\n");
 
-            int count = _blacklists.missingAll;
+            int count = BlacklistService.TotalMissing();
 
             _doSync = true;
 
-            foreach (BlacklistedPlayer blacklistedPlayer in _blacklists.missingBlacklistedPlayers)
+            foreach (BlacklistedPlayer blacklistedPlayer in BlacklistService.missingBlacklistedPlayers)
             {
                 string ign = blacklistedPlayer.ign;
                 _popupWindow.ShowName(ign);
@@ -280,12 +281,12 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
 
                 if (!_doSync)
                 {
-                    await _blacklists.PartialSync(blacklistedPlayer);
+                    await BlacklistService.UpdateBlacklists(BlacklistService.UpdateType.Partial, blacklistedPlayer);
                     return;
                 }
             }
 
-            await _blacklists.SyncLists();
+            await BlacklistService.UpdateBlacklists(BlacklistService.UpdateType.Full);
 
             _popupWindow.Dispose();
 
@@ -293,7 +294,7 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
             _doSync = false;
             _popupWindow.ShowLowerLabel("Finished syncing your block list successfully");
             _popupWindow.ShowMiddleButton("Close");
-            _popupWindow.middleButton.Click += delegate { _popupWindow.Dispose(); };
+            _popupWindow.middleButton.Click += async (s, e) => { _popupWindow.Dispose(); await CheckForBlacklistUpdate(false, false); };
 
             await CheckForBlacklistUpdate(false, false);
         }
@@ -321,7 +322,7 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
             _popupWindow.ShowLeftButton("Resume");
             _popupWindow.leftButton.Click += async delegate { _popupWindow.Dispose(); await SyncNames(); };
             _popupWindow.ShowRightButton("Cancel");
-            _popupWindow.rightButton.Click += delegate { _popupWindow.Dispose(); };
+            _popupWindow.rightButton.Click += async delegate { _popupWindow.Dispose(); await CheckForBlacklistUpdate(false, false);  };
         }
 
         /// <summary>
@@ -329,32 +330,30 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
         /// </summary>
         private async Task SkipUpdate()
         {
-            await _blacklists.SyncLists();
+            await BlacklistService.UpdateBlacklists(BlacklistService.UpdateType.Full);
             await CheckForBlacklistUpdate(false, false);
         }
 
         /// <summary>
         /// Performs check for any updates, changes corner icon and creates popup if enabled in user settings
         /// </summary>
-        /// <param name="showPopup">If true, will show a popup if there is an update available. If false, skips showing an update</param>
-        /// <param name="checkForUpdates">If true, will query the remote list to check for updates there. If false, just checks the local lists</param>
         private async Task CheckForBlacklistUpdate(bool showPopup, bool checkForUpdates)
         {
-            if (checkForUpdates) { await _blacklists.HasUpdate(); }
-            else _blacklists.LoadMissingList();
+            if (checkForUpdates) { await BlacklistService.HasUpdate(); }
+            else await BlacklistService.LoadMissingList();
 
 
-            if (_blacklists.HasMissingNames())
+            if (BlacklistService.HasMissingNames())
             {
                 if (showPopup && _settingShowAlertPopup.Value)
                 {
                     _popupWindow = new PopupWindow("Update Available!");
-                    _popupWindow.ShowUpperLabel("There has been an update to the blacklist!\nTo start sync process, click the button\n\n" + _blacklists.NewNamesLabel());
+                    _popupWindow.ShowUpperLabel("There has been an update to the blacklist!\nTo start sync process, click the button\n\n" + BlacklistService.NewNamesLabel());
                     _popupWindow.ShowMiddleButton("Begin Sync");
                     _popupWindow.middleButton.Click += delegate { _popupWindow.Dispose(); InitiateSync(); };
                 }
 
-                _blacklistCornerIcon.ShowAlert(_blacklists.missingAll);
+                _blacklistCornerIcon.ShowAlert(BlacklistService.TotalMissing());
             }
             else
             {
