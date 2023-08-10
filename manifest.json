@@ -17,5 +17,11 @@
     }
   ],
   "directories": [ "blacklistbuddy" ],
-  "enabled_without_gw2": false
-}
+  "enabled_without_gw2": false,
+  "api_permissions": {
+    "account": {
+      "optional": true,
+      "details": "Only required if you want to use blacklist buddy on multiple account. Used to acquire the account you are currently on"
+    }
+  }
+ }

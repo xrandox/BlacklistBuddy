@@ -7,7 +7,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Teh.BHUD.Blacklist_Buddy_Module.Controls;
+using Teh.BHUD.Blacklist_Buddy_Module.Utils;
 
 namespace Teh.BHUD.Blacklist_Buddy_Module.Models
 {
@@ -17,7 +17,7 @@ namespace Teh.BHUD.Blacklist_Buddy_Module.Models
         
         private static readonly Logger Logger = Logger.GetLogger<BlacklistBuddyModule>();
 
-        private List<BlacklistedPlayer> internalBlacklist = new List<BlacklistedPlayer>();
+        public List<BlacklistedPlayer> internalBlacklist = new List<BlacklistedPlayer>();
         private List<BlacklistedPlayer> externalBlacklist = new List<BlacklistedPlayer>();
         public List<BlacklistedPlayer> missingBlacklistedPlayers = new List<BlacklistedPlayer>();
         public int cachedListIndex { get; set; }
@@ -51,7 +51,7 @@ namespace Teh.BHUD.Blacklist_Buddy_Module.Models
 
             try
             {
-                string dir = BlacklistBuddyModule.ModuleInstance.DirectoriesManager.GetFullDirectoryPath("blacklistbuddy") + "\\Blacklist.json";
+                string dir = BlacklistBuddyModule.ModuleInstance.AccountUtil.Path + "\\Blacklist.json";
 
                 if (!File.Exists(dir))
                 {
@@ -158,8 +158,8 @@ namespace Teh.BHUD.Blacklist_Buddy_Module.Models
         {
             try
             {
-                string dir = BlacklistBuddyModule.ModuleInstance.DirectoriesManager.GetFullDirectoryPath("blacklistbuddy") + "\\Blacklist.json";
-                System.IO.File.WriteAllText(dir, JsonSerializer.Serialize(internalBlacklist));
+                string dir = BlacklistBuddyModule.ModuleInstance.AccountUtil.Path + "\\Blacklist.json";
+                File.WriteAllText(dir, JsonSerializer.Serialize(internalBlacklist));
             }
             catch (Exception e)
             {

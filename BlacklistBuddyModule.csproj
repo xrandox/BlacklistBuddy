@@ -64,10 +64,11 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Utils\AccountUtil.cs" />
     <Compile Include="BlacklistBuddyModule.cs" />
     <Compile Include="Controls\BlacklistCornerIcon.cs" />
     <Compile Include="Controls\PopupWindow.cs" />
-    <Compile Include="RemoteDataUtil.cs" />
+    <Compile Include="Utils\RemoteDataUtil.cs" />
     <Compile Include="Models\Blacklists.cs" />
     <Compile Include="Models\BlacklistedPlayer.cs" />
   </ItemGroup>

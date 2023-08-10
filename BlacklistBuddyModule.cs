@@ -9,6 +9,7 @@ using System.ComponentModel.Composition;
 using System.Threading.Tasks;
 using Blish_HUD.Input;
 using Blish_HUD.Controls.Extern;
+using Teh.BHUD.Blacklist_Buddy_Module.Utils;
 using Teh.BHUD.Blacklist_Buddy_Module.Models;
 using Teh.BHUD.Blacklist_Buddy_Module.Controls;
 using Blish_HUD.Controls;
@@ -36,10 +37,12 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
         public static SettingEntry<bool> _settingIncludeGW2E;
         public static SettingEntry<bool> _settingIncludeOther;
         public static SettingEntry<bool> _settingIncludeUnknown;
+        public static SettingEntry<bool> _settingSeparateAccounts;
         public static SettingEntry<int> _settingInputBuffer;
         private PopupWindow _popupWindow;
         private BlacklistCornerIcon _blacklistCornerIcon;
         internal Blacklists _blacklists;
+        internal AccountUtil AccountUtil;
 
         private volatile bool _doSync = false;
         private double _runningTime;
@@ -58,6 +61,7 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
             _settingIncludeGW2E        = settings.DefineSetting("IncludeGW2E", true, ()=>"Include r/GW2Exchange blacklist", ()=>"GW2Exchange does not list specific reasoning, but they are listed for either breaking ToS, subreddit rules or scamming");
             _settingIncludeOther       = settings.DefineSetting("IncludeOther", true, ()=>"Include individuals blacklisted for other reasons", ()=>"Such as: Gross Misconduct, Horrible Trade Etiquette, other ToS Violations, etc");
             _settingIncludeUnknown     = settings.DefineSetting("IncludeUnknown", true, ()=>"Include individuals blacklist for unknown reasons", ()=>"The reason behind why these names are blacklisted have been lost with time. Still not recommended to trade with them.");
+            _settingSeparateAccounts   = settings.DefineSetting("SeparateAccounts", false, () => "Account-Specific Blacklists (requires API Key with Account priviledge)", () => "Allows you to keep track of synced names separately for different accounts. Requires the an API Key to acquire your account name.");
 
             _settingInputBuffer = settings.DefineSetting("InputBuffer", 100, () => "Input Buffer (Low - High)", () => "Increases the time between adding names. Default: Low. \nWARNING: Raising this slider too high will result in very long sync durations.");
             _settingInputBuffer.SetRange(100, 500);
@@ -70,13 +74,18 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
             _settingIncludeGW2E.SettingChanged    += async (s, e) => { await CheckForBlacklistUpdate(false, false); };
             _settingIncludeOther.SettingChanged   += async (s, e) => { await CheckForBlacklistUpdate(false, false); };
             _settingIncludeUnknown.SettingChanged += async (s, e) => { await CheckForBlacklistUpdate(false, false); };
+            _settingSeparateAccounts.SettingChanged += async (s, e) => { await AccountUtil.AccountSettingChanged(e.NewValue); };
         }
 
-        protected override void Initialize() { }
+        protected override void Initialize() 
+        {
+            AccountUtil = new AccountUtil(Gw2ApiManager, DirectoriesManager, Logger);
+            _settingSeparateAccounts.SetValidation(AccountUtil.ValidateSetting);
+        }
 
         protected override async Task LoadAsync() {
             _blacklists = new Blacklists();
-            await _blacklists.LoadAll();
+            AccountUtil.AccountSettingChanged(_settingSeparateAccounts.Value).Wait();
         }
 
         protected override void OnModuleLoaded(EventArgs e)
@@ -90,7 +99,7 @@ namespace Teh.BHUD.Blacklist_Buddy_Module
             _blacklistCornerIcon.Click += delegate { };
 
             CheckForBlacklistUpdate(true, true);
-
+            
             GameService.GameIntegration.Gw2Instance.Gw2LostFocus += delegate { 
                 if (_doSync)
                 {

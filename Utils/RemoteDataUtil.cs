@@ -4,7 +4,7 @@ using Blish_HUD;
 using Flurl.Http;
 using Teh.BHUD.Blacklist_Buddy_Module.Models;
 
-namespace Teh.BHUD.Blacklist_Buddy_Module
+namespace Teh.BHUD.Blacklist_Buddy_Module.Utils
 {
     public static class RemoteDataUtil {
 
