@@ -82,7 +82,7 @@ namespace Teh.BHUD.Blacklist_Buddy_Module.Utils
             }
 
             // Then we need to reload the lists to whatever the new list path is
-            await BlacklistBuddyModule.ModuleInstance._blacklists.LoadAll();
+            await BlacklistBuddyModule.ModuleInstance.BlacklistService.LoadAll();
         }
 
         /// <summary>
