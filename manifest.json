@@ -1,6 +1,6 @@
 {
   "name": "Blacklist Buddy",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "namespace": "Teh.BHUD.Blacklist_Buddy_Module",
   "package": "Teh.BHUD.Blacklist_Buddy_Module.dll",
   "manifest_version": 1,
@@ -21,7 +21,7 @@
   "api_permissions": {
     "account": {
       "optional": true,
-      "details": "Only required if you want to use blacklist buddy on multiple account. Used to acquire the account you are currently on"
+      "details": "Only required if you want to use blacklist buddy on multiple accounts. Used to acquire the account you are currently on."
     }
   }
  }
