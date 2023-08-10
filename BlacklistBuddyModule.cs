@@ -3,16 +3,13 @@ using Blish_HUD.Modules;
 using Blish_HUD.Modules.Managers;
 using Blish_HUD.Settings;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
 using System;
 using System.ComponentModel.Composition;
 using System.Threading.Tasks;
-using Blish_HUD.Input;
 using Blish_HUD.Controls.Extern;
 using Teh.BHUD.Blacklist_Buddy_Module.Utils;
 using Teh.BHUD.Blacklist_Buddy_Module.Models;
 using Teh.BHUD.Blacklist_Buddy_Module.Controls;
-using Blish_HUD.Controls;
 
 namespace Teh.BHUD.Blacklist_Buddy_Module
 {

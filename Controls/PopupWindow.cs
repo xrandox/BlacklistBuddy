@@ -1,14 +1,7 @@
 ﻿using Blish_HUD;
-using Blish_HUD.Content;
 using Blish_HUD.Controls;
-using Blish_HUD.Modules.Managers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Teh.BHUD.Blacklist_Buddy_Module.Controls
 {

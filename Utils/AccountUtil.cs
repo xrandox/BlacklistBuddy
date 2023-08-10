@@ -1,15 +1,9 @@
 ﻿using Blish_HUD;
-using Blish_HUD.ArcDps.Common;
 using Blish_HUD.Controls;
 using Blish_HUD.Modules.Managers;
-using Gw2Sharp.WebApi.Exceptions;
 using Gw2Sharp.WebApi.V2.Models;
 using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.AccessControl;
-using System.Text;
 using System.Threading.Tasks;
 using File = System.IO.File;
 using Blish_HUD.Settings;

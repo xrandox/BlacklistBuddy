@@ -1,13 +1,6 @@
-﻿using Blish_HUD;
-using Blish_HUD.Modules.Managers;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Teh.BHUD.Blacklist_Buddy_Module.Models;
 
 namespace Teh.BHUD.Blacklist_Buddy_Module.Utils
 {
